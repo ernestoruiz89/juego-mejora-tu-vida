@@ -3,10 +3,17 @@
 ## 📋 Reglas del Juego
 
 ### Objetivo
-Acumular la mayor cantidad de dinero tomando decisiones financieras inteligentes a lo largo del tablero.
+**¡Ser el primero en alcanzar la Libertad Financiera o el último jugador en pie!**
+
+Gana el jugador que:
+- Acumule **$50,000 en capital total** (dinero + propiedades), O
+- Sea el **último jugador activo** cuando todos los demás se declaren en quiebra
 
 ### Dinero Inicial
 Cada jugador comienza con **$15,000**
+
+### Jugadores
+El juego soporta de **2 a 6 jugadores** en la misma computadora
 
 ---
 
@@ -86,24 +93,35 @@ Cuando caes en un espacio verde, recibes ingresos de tu trabajo o actividades y 
 
 ## 🎯 Esquinas Especiales
 
-### INICIO (Espacio 0)
-- **Al pasar por INICIO:** Ganas $2,000
-- **Al caer en INICIO:** Ganas $2,000
+### AHORRO O DEUDA (Espacio 0) 🏠
+**Punto de partida del tablero**
+
+- **Al CAER en esta casilla:** Ganas $2,000
+- **Al PASAR por esta casilla:** Pagas $15 de gasto fijo de alimentación
 - Es el punto de partida de todos los jugadores
+- Completar una vuelta completa del tablero significa "pasar" por la casilla
 
-### 🎲 SORTEO (Espacio 10)
-- Esquina de sorteo
-- Actualmente muestra mensaje especial
-- Puede expandirse con mecánicas de cartas o sorteos especiales
+**Diferencia importante:**
+- 🎯 **CAER** = Tus dados te llevan exactamente a la casilla 0 → Ganas $2,000
+- 🔄 **PASAR** = Completas una vuelta alrededor del tablero → Pagas $15
 
-### 📊 INVERSIONES (Espacio 20)
-- Esquina de inversiones
-- Actualmente muestra mensaje especial
-- Puede expandirse con opciones de inversión estratégica
+### ⛓️ CASTIGO - Cuarto de los Castigados (Espacio 20)
+**Casilla de penalización**
 
-### 💵 MONEY (Espacio 30)
-- **Al caer:** Ganas $5,000
-- La esquina más lucrativa del tablero
+- **Al caer:** El jugador es enviado al Cuarto de los Castigados
+- **Duración:** Permaneces **2 turnos** completos sin poder jugar
+- **Restricciones:** NO puedes comprar ni vender propiedades/animales mientras estás castigado
+- **Indicador visual:** La tarjeta del jugador se oscurece con borde naranja
+
+**Mecánica de Salida:**
+- Cada turno que pasa, el contador se reduce en 1
+- Después de 2 turnos, sales automáticamente con notificación de liberación
+- No puedes salir antes de cumplir los 2 turnos completos
+
+### ⚠️ Esquinas Eliminadas
+Las siguientes esquinas ya no son especiales:
+- ~~Espacio 10: SORTEO~~ → Ahora es un espacio regular de color
+- ~~Espacio 30: MONEY~~ → Ahora es un espacio regular de color
 
 ---
 
@@ -114,16 +132,38 @@ Cuando caes en un espacio verde, recibes ingresos de tu trabajo o actividades y 
 2. Selecciona el número de jugadores (2-6)
 3. Personaliza los nombres (opcional)
 4. Click en "Confirmar"
+5. El juego inicia con todos los jugadores en AHORRO O DEUDA
 
-### Durante el Juego
+### Durante el Juego - Turno Normal
 1. El jugador actual está destacado en el panel superior
 2. Click en "Lanzar Dados"
 3. Se lanzan 2 dados automáticamente
-4. Tu ficha se mueve la cantidad de espacios indicada
-5. Se aplica el evento del espacio donde caíste
-6. Una notificación muestra lo que sucedió y cuánto dinero ganaste/perdiste
-7. El dinero se actualiza automáticamente en tu tarjeta de jugador
-8. El turno pasa al siguiente jugador
+4. **Si sacas DOBLES (ambos dados iguales):**
+   - Tu ficha se mueve normalmente
+   - Se aplica el evento de la casilla
+   - ¡Tiras de nuevo! 🎲🎲 (no pasa el turno)
+   - Puedes seguir tirando si vuelves a sacar dobles
+5. **Si NO sacas dobles:**
+   - Tu ficha se mueve la cantidad de espacios indicada
+   - Si pasaste por AHORRO O DEUDA → se cobra $15 de alimentación
+   - Se aplica el evento del espacio donde caíste
+   - El dinero se actualiza automáticamente
+   - El turno pasa al siguiente jugador
+
+### Durante el Juego - Turno en el Castigo
+Si un jugador está en el **Cuarto de los Castigados**:
+1. Al hacer click en "Lanzar Dados", NO se tiran dados
+2. El contador de turnos se reduce en 1
+3. Aparece notificación mostrando turnos restantes
+4. El turno pasa automáticamente al siguiente jugador
+5. Después de 2 turnos, el jugador sale y puede volver a jugar normalmente
+
+### Fin del Juego
+1. El juego detecta automáticamente cuando alguien gana
+2. Se muestra modal de victoria dorado 🏆
+3. Aparece el nombre del ganador y la razón
+4. Se muestra la clasificación final de todos los jugadores
+5. Botón "Nuevo Juego" para jugar otra partida
 
 ### Controles
 - **"Lanzar Dados"**: Tira los dados en tu turno
@@ -134,29 +174,34 @@ Cuando caes en un espacio verde, recibes ingresos de tu trabajo o actividades y 
 
 ## 📊 Sistema de Notificaciones
 
-Cada tipo de evento tiene un color distintivo:
+Cada tipo de evento tiene un color distintivo y emoji característico:
 
-| Tipo | Color | Emoji |
-|------|-------|-------|
-| Gastos (Rojo) | Rojo intenso | 💸 |
-| Inversión (Azul) | Azul intenso | 📈 |
-| Ingresos (Verde) | Verde intenso | 💰 |
-| Sorpresa Positiva | Naranja | 🎁 |
-| Sorpresa Negativa | Naranja oscuro | ⚠️ |
-| Esquinas | Morado/Azul | Variado |
+| Tipo | Color | Emoji | Ejemplo |
+|------|-------|-------|---------|
+| Gastos (Rojo) | Rojo intenso | 💸 | "Reparación de Auto -$500" |
+| Inversión (Azul) | Azul intenso | 📈 | "Inversión en Bolsa +$1,500" |
+| Ingresos (Verde) | Verde intenso | 💰 | "Salario Mensual +$2,000" |
+| Sorpresa Positiva | Naranja | 🎁 | "Ganaste la Lotería +$3,000" |
+| Sorpresa Negativa | Naranja oscuro | ⚠️ | "Multa Inesperada -$800" |
+| Números Dobles | Naranja | 🎲🎲 | "¡Sacó DOBLES! Tira de nuevo" |
+| Castigo | Naranja oscuro | ⛓️ | "Enviado al Cuarto de Castigados" |
+| Liberación | Verde | 🎉 | "Salió del Cuarto de Castigados" |
+| Victoria | Dorado | 🏆 | "¡Ganó por Libertad Financiera!" |
 
-Las notificaciones aparecen en el centro de la pantalla por 3 segundos con animación de entrada y salida.
+Las notificaciones aparecen en el centro de la pantalla por 2-3 segundos con animaciones suaves de entrada y salida.
 
 ---
 
 ## 💡 Estrategia
 
 ### Consejos Generales
-- **Espacios Verdes y Azules** son siempre positivos
-- **Espacios Rojos** siempre te cuestan dinero - evítalos si puedes
+- **Espacios Verdes y Azules** son siempre positivos - intenta caer en ellos
+- **Espacios Rojos** siempre te cuestan dinero
 - **Espacios Amarillos** son impredecibles - pueden ser muy buenos o muy malos
-- Pasar por **INICIO** es importante para mantener un flujo de dinero constante
-- La esquina **MONEY** da la mayor recompensa ($5,000)
+- **Evita el CASTIGO (espacio 20)** - perder 2 turnos puede costarte la victoria
+- **Gestiona tu dinero** - Ten suficiente para pagar el gasto de alimentación ($15) cada vuelta
+- **Busca los dobles** - Te dan turnos extra para avanzar más rápido
+- **Capital total es lo que importa** - No solo el dinero, también las propiedades cuentan
 
 ### Rangos de Eventos
 - **Gastos (Rojo):** -$300 a -$1,200
@@ -164,17 +209,37 @@ Las notificaciones aparecen en el centro de la pantalla por 3 segundos con anima
 - **Inversión (Azul):** +$1,000 a +$2,200
 - **Sorpresas:** -$1,500 a +$3,000
 
+### Estrategia para Ganar
+1. **Mantén un balance saludable** - No gastes todo tu dinero
+2. **Acumula propiedades** cuando puedas - contribuyen a tu capital total
+3. **Evita quedarte sin dinero** - Podrías declararte en quiebra
+4. **Aprovecha los dobles** - Los turnos extra son muy valiosos
+5. **Ten paciencia** - Llegar a $50,000 requiere varias vueltas al tablero
+
 ---
 
 ## 🎯 Condición de Victoria
 
-Actualmente, el juego es de duración libre. Puedes establecer tus propias condiciones:
+El juego termina cuando se cumple una de estas condiciones:
 
-### Opciones sugeridas:
-1. **Por Tiempo:** El jugador con más dinero después de X rondas (ej: 20 turnos)
-2. **Por Meta:** El primer jugador en alcanzar $50,000
-3. **Por Quiebra:** El último jugador que no llegue a $0
-4. **Por Decisión:** Juega hasta que todos estén listos y cuenta el dinero
+### 1. Libertad Financiera 🏆
+**El primer jugador en alcanzar $50,000 en capital total gana inmediatamente.**
+
+El capital total incluye:
+- Dinero en efectivo
+- Valor de todas las propiedades y animales
+
+Cuando un jugador alcanza esta meta, el juego termina automáticamente y se muestra la pantalla de victoria con la clasificación final.
+
+### 2. Último Jugador en Pie 💪
+**Si todos los jugadores excepto uno se declaran en quiebra, el jugador restante gana.**
+
+El juego continúa hasta que solo quede un jugador capaz de jugar.
+
+### 3. Opciones Alternativas (Opcional)
+Puedes establecer tus propias reglas de victoria:
+- **Por Tiempo:** El jugador con más capital después de X rondas
+- **Por Decisión:** Juega hasta que todos estén listos y cuenta el capital total
 
 ---
 
@@ -182,16 +247,13 @@ Actualmente, el juego es de duración libre. Puedes establecer tus propias condi
 
 Si quieres ajustar las cantidades o eventos, puedes editar el archivo `game.js`:
 
-- **Líneas 411-426:** Eventos de Gastos (rojos)
-- **Líneas 428-443:** Eventos de Inversión (azules)
-- **Líneas 445-468:** Eventos de Sorpresa (amarillos)
-- **Líneas 470-485:** Eventos de Ingresos (verdes)
-- **Líneas 368-389:** Recompensas de esquinas
-
-También puedes cambiar el dinero inicial modificando la línea 50 en `game.js`:
-```javascript
-this.money = 15000; // Cambia este valor
-```
+- **Meta de Libertad Financiera:** Línea 10 - Cambia `financialFreedomGoal: 50000`
+- **Dinero Inicial:** Línea 77 - Cambia `this.money = 15000`
+- **Turnos en Castigo:** Línea 474 - Cambia `punishmentTurnsRemaining = 2`
+- **Eventos de Gastos (rojos):** Líneas 501-516
+- **Eventos de Inversión (azules):** Líneas 518-533
+- **Eventos de Sorpresa (amarillos):** Líneas 535-556
+- **Eventos de Ingresos (verdes):** Líneas 558-573
 
 ---
 
