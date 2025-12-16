@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
     <meta name="description" content="Juego de mesa digital multijugador basado en decisiones financieras">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="game-container">
         <!-- Header -->
@@ -35,8 +39,8 @@
                 <!-- Bottom Row (Index 0-10) -->
                 <div class="space corner bottom-right" data-index="0" data-type="corner">
                     <div class="space-content">
-                        <div class="corner-icon">🎯</div>
-                        <div class="space-name">INICIO</div>
+                        <div class="corner-icon">🏠</div>
+                        <div class="space-name">INICIO<br>(AHORRO O DEUDA)</div>
                     </div>
                 </div>
                 <div class="space bottom" data-index="1" data-color="blue"></div>
@@ -48,11 +52,8 @@
                 <div class="space bottom" data-index="7" data-color="blue"></div>
                 <div class="space bottom" data-index="8" data-color="red"></div>
                 <div class="space bottom" data-index="9" data-color="yellow"></div>
-                <div class="space corner bottom-left" data-index="10" data-type="corner">
-                    <div class="space-content">
-                        <div class="corner-icon">🎲</div>
-                        <div class="space-name">SORTEO</div>
-                    </div>
+                <div class="space corner bottom-left" data-index="10">
+                    <!-- Espacio regular, sin texto especial -->
                 </div>
 
                 <!-- Left Column (Index 11-19) -->
@@ -69,8 +70,8 @@
                 <!-- Top Row (Index 20-30) -->
                 <div class="space corner top-left" data-index="20" data-type="corner">
                     <div class="space-content">
-                        <div class="corner-icon">📊</div>
-                        <div class="space-name">INVERSIONES</div>
+                        <div class="corner-icon">⛓️</div>
+                        <div class="space-name">CASTIGO</div>
                     </div>
                 </div>
                 <div class="space top" data-index="21" data-color="blue"></div>
@@ -82,11 +83,8 @@
                 <div class="space top" data-index="27" data-color="red"></div>
                 <div class="space top" data-index="28" data-color="yellow"></div>
                 <div class="space top" data-index="29" data-color="blue"></div>
-                <div class="space corner top-right" data-index="30" data-type="corner">
-                    <div class="space-content">
-                        <div class="corner-icon">💵</div>
-                        <div class="space-name">MONEY</div>
-                    </div>
+                <div class="space corner top-right" data-index="30">
+                    <!-- Espacio regular, sin texto especial -->
                 </div>
 
                 <!-- Right Column (Index 31-39) -->
@@ -143,4 +141,5 @@
 
     <script src="game.js"></script>
 </body>
+
 </html>
