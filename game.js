@@ -4,7 +4,10 @@ class GameState {
         this.players = [];
         this.currentPlayerIndex = 0;
         this.gameStarted = false;
+        this.gameEnded = false;
+        this.winner = null;
         this.boardSpaces = 40;
+        this.financialFreedomGoal = 50000; // Meta para libertad financiera
     }
 
     addPlayer(name, color, emoji) {
@@ -32,10 +35,29 @@ class GameState {
         });
     }
 
+    checkVictoryConditions() {
+        // Check for financial freedom
+        for (const player of this.players) {
+            if (!player.bankruptcyDeclared && player.getTotalCapital() >= this.financialFreedomGoal) {
+                return { winner: player, reason: 'financial_freedom' };
+            }
+        }
+
+        // Check if only one player remains (others bankrupt)
+        const activePlayers = this.players.filter(p => !p.bankruptcyDeclared);
+        if (activePlayers.length === 1) {
+            return { winner: activePlayers[0], reason: 'last_standing' };
+        }
+
+        return null;
+    }
+
     reset() {
         this.players = [];
         this.currentPlayerIndex = 0;
         this.gameStarted = false;
+        this.gameEnded = false;
+        this.winner = null;
     }
 }
 
@@ -49,11 +71,19 @@ class Player {
         this.position = 0;
         this.money = 15000; // Starting money
         this.properties = [];
+        this.bankruptcyDeclared = false;
+        this.inPunishmentRoom = false;
+        this.punishmentTurnsRemaining = 0;
     }
 
     move(spaces, animate = true) {
+        const oldPosition = this.position;
         this.position = (this.position + spaces) % 40;
-        return this.position;
+
+        // Detect if player passed through start (went from higher number to lower)
+        const passedStart = (oldPosition + spaces) >= 40;
+
+        return { position: this.position, passedStart };
     }
 
     addMoney(amount) {
@@ -74,6 +104,21 @@ class Player {
                 moneyElement.textContent = `$${this.money.toLocaleString()}`;
             }
         }
+    }
+
+    getTotalCapital() {
+        // Calculate total wealth (money + properties value)
+        const propertiesValue = this.properties.reduce((sum, prop) => sum + (prop.value || 0), 0);
+        return this.money + propertiesValue;
+    }
+
+    canBuyOrSell() {
+        // Can't buy or sell while in punishment room
+        return !this.inPunishmentRoom;
+    }
+
+    isBankrupt() {
+        return this.bankruptcyDeclared || (this.money <= 0 && this.properties.length === 0);
     }
 }
 
@@ -97,6 +142,10 @@ class DiceSystem {
             <div class="dice-value">${this.dice1}</div>
             <div class="dice-value">${this.dice2}</div>
         `;
+    }
+
+    isDouble() {
+        return this.dice1 === this.dice2;
     }
 }
 
@@ -128,13 +177,13 @@ class BoardManager {
 
     getSpaceName(index) {
         const names = [
-            'INICIO', 'Espacio 1', 'Espacio 2', 'Espacio 3', 'Espacio 4',
+            'AHORRO O DEUDA', 'Espacio 1', 'Espacio 2', 'Espacio 3', 'Espacio 4',
             'Espacio 5', 'Espacio 6', 'Espacio 7', 'Espacio 8', 'Espacio 9',
-            'SORTEO', 'Espacio 11', 'Espacio 12', 'Espacio 13', 'Espacio 14',
+            'Espacio 10', 'Espacio 11', 'Espacio 12', 'Espacio 13', 'Espacio 14',
             'Espacio 15', 'Espacio 16', 'Espacio 17', 'Espacio 18', 'Espacio 19',
-            'INVERSIONES', 'Espacio 21', 'Espacio 22', 'Espacio 23', 'Espacio 24',
+            'CASTIGO', 'Espacio 21', 'Espacio 22', 'Espacio 23', 'Espacio 24',
             'Espacio 25', 'Espacio 26', 'Espacio 27', 'Espacio 28', 'Espacio 29',
-            'MONEY', 'Espacio 31', 'Espacio 32', 'Espacio 33', 'Espacio 34',
+            'Espacio 30', 'Espacio 31', 'Espacio 32', 'Espacio 33', 'Espacio 34',
             'Espacio 35', 'Espacio 36', 'Espacio 37', 'Espacio 38', 'Espacio 39'
         ];
         return names[index] || `Espacio ${index}`;
@@ -323,7 +372,38 @@ class GameController {
             return;
         }
 
+        if (this.gameState.gameEnded) {
+            return; // Game is over
+        }
+
         const currentPlayer = this.gameState.getCurrentPlayer();
+
+        // Skip if player is  bankrupt
+        if (currentPlayer.bankruptcyDeclared) {
+            this.gameState.nextTurn();
+            return;
+        }
+
+        // Handle punishment room
+        if (currentPlayer.inPunishmentRoom) {
+            currentPlayer.punishmentTurnsRemaining--;
+
+            if (currentPlayer.punishmentTurnsRemaining <= 0) {
+                currentPlayer.inPunishmentRoom = false;
+                currentPlayer.punishmentTurnsRemaining = 0;
+                this.showNotification(`¡${currentPlayer.name} salió del CUARTO DE LOS CASTIGADOS! 🎉`, 'surprise-positive');
+                this.updatePlayerCardStatus(currentPlayer);
+            } else {
+                this.showNotification(`${currentPlayer.name} está en el CUARTO DE LOS CASTIGADOS ⛓️ (${currentPlayer.punishmentTurnsRemaining} ${currentPlayer.punishmentTurnsRemaining === 1 ? 'turno' : 'turnos'} restantes)`, 'surprise-negative');
+            }
+
+            // Skip turn
+            setTimeout(() => {
+                this.gameState.nextTurn();
+            }, 2000);
+            return;
+        }
+
         const rollButton = document.getElementById('roll-dice-btn');
         const diceResult = document.getElementById('dice-result');
 
@@ -335,20 +415,43 @@ class GameController {
         setTimeout(() => {
             const result = this.diceSystem.roll();
             this.diceSystem.displayResult(diceResult);
+            const isDouble = this.diceSystem.isDouble();
 
             // Move player
-            const newPosition = currentPlayer.move(result.total);
-            this.boardManager.movePlayerToken(currentPlayer, newPosition, true);
+            const moveResult = currentPlayer.move(result.total);
+            this.boardManager.movePlayerToken(currentPlayer, moveResult.position, true);
+
+            // Charge food expense if passed start (not landing on it)
+            if (moveResult.passedStart && moveResult.position !== 0) {
+                currentPlayer.subtractMoney(15);
+                this.showNotification(`${currentPlayer.name} pasó por AHORRO O DEUDA - Gasto de alimentación: -$15`, 'expense');
+            }
 
             // Handle landing on space
-            this.handleSpaceLanding(currentPlayer, newPosition);
+            this.handleSpaceLanding(currentPlayer, moveResult.position);
 
-            // Re-enable button and move to next turn
+            // Check victory conditions
+            const victoryResult = this.gameState.checkVictoryConditions();
+            if (victoryResult) {
+                this.declareWinner(victoryResult.winner, victoryResult.reason);
+                rollButton.disabled = true;
+                return;
+            }
+
+            // Re-enable button and handle turn
             setTimeout(() => {
                 rollButton.classList.remove('rolling');
-                this.gameState.nextTurn();
-                rollButton.disabled = false;
-            }, 1000);
+
+                if (isDouble && !currentPlayer.bankruptcyDeclared) {
+                    // Player rolled doubles - gets another turn!
+                    this.showNotification(`¡${currentPlayer.name} sacó DOBLES! 🎲🎲 Tira de nuevo`, 'surprise-positive');
+                    rollButton.disabled = false;
+                } else {
+                    // Normal turn - move to next player
+                    this.gameState.nextTurn();
+                    rollButton.disabled = false;
+                }
+            }, 1500);
         }, 500);
     }
 
@@ -367,23 +470,18 @@ class GameController {
 
     handleCornerSpace(player, space) {
         switch (space.index) {
-            case 0: // INICIO
-                console.log(`${player.name} on START`);
+            case 0: // AHORRO O DEUDA (START)
+                console.log(`${player.name} landed on START`);
+                // Landing on start gives money
                 player.addMoney(2000);
-                this.showNotification(`¡${player.name} pasó por INICIO! +$2,000`, 'income');
+                this.showNotification(`¡${player.name} cayó en AHORRO O DEUDA! +$2,000`, 'income');
                 break;
-            case 10: // SORTEO
-                console.log(`${player.name} on SORTEO`);
-                this.showNotification(`${player.name} en SORTEO - ¡Suerte!`, 'surprise-positive');
-                break;
-            case 20: // INVERSIONES
-                console.log(`${player.name} on INVERSIONES`);
-                this.showNotification(`${player.name} en INVERSIONES`, 'investment');
-                break;
-            case 30: // MONEY
-                console.log(`${player.name} on MONEY`);
-                player.addMoney(5000);
-                this.showNotification(`¡${player.name} ganó $5,000 en MONEY!`, 'income');
+            case 20: // CASTIGO (Punishment Room)
+                console.log(`${player.name} sent to CASTIGO`);
+                player.inPunishmentRoom = true;
+                player.punishmentTurnsRemaining = 2; // 2 turns in punishment
+                this.showNotification(`¡${player.name} fue enviado al CUARTO DE LOS CASTIGADOS! ⛓️ (2 turnos)`, 'surprise-negative');
+                this.updatePlayerCardStatus(player);
                 break;
         }
     }
@@ -525,6 +623,110 @@ class GameController {
             notification.style.animation = 'notification-out 0.3s ease-in';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+
+    declareWinner(winner, reason) {
+        this.gameState.gameEnded = true;
+        this.gameState.winner = winner;
+
+        const reasonText = reason === 'financial_freedom'
+            ? '¡Alcanzó la Libertad Financiera!'
+            : '¡Último jugador en pie!';
+
+        // Calculate final standings
+        const standings = this.gameState.players
+            .map(p => ({ player: p, capital: p.getTotalCapital() }))
+            .sort((a, b) => b.capital - a.capital);
+
+        let standingsHTML = standings.map((s, i) =>
+            `<div style="margin: 0.5rem 0; font-size: 1.1rem; ${s.player.bankruptcyDeclared ? 'opacity: 0.5; text-decoration: line-through;' : ''}">
+                ${i + 1}. ${s.player.emoji} ${s.player.name}: $${s.capital.toLocaleString()}
+                ${s.player.bankruptcyDeclared ? ' (Quebrado)' : ''}
+            </div>`
+        ).join('');
+
+        // Create victory modal
+        const victoryModal = document.createElement('div');
+        victoryModal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s ease-out;
+        `;
+
+        victoryModal.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                padding: 3rem;
+                border-radius: 2rem;
+                text-align: center;
+                max-width: 600px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                border: 5px solid #FFD700;
+            ">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                <h1 style="font-size: 3rem; margin: 0; color: #1a1a1a; font-family: 'Fredoka', sans-serif;">
+                    ¡${winner.name} GANÓ!
+                </h1>
+                <p style="font-size: 1.5rem; margin: 1rem 0; color: #333;">
+                    ${reasonText}
+                </p>
+                <div style="background: white; padding: 1.5rem; border-radius: 1rem; margin: 2rem 0;">
+                    <h3 style="margin-top: 0; color: #1a1a1a; font-size: 1.5rem;">Clasificación Final</h3>
+                    ${standingsHTML}
+                </div>
+                <button onclick="location.reload()" style="
+                    background: #10b981;
+                    color: white;
+                    border: none;
+                    padding: 1rem 2rem;
+                    font-size: 1.2rem;
+                    border-radius: 0.5rem;
+                    cursor: pointer;
+                    font-family: 'Fredoka', sans-serif;
+                    font-weight: 600;
+                    margin-top: 1rem;
+                ">
+                    Nuevo Juego
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(victoryModal);
+
+        // Add fadeIn animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log(`Game Over! Winner: ${winner.name} (${reasonText})`);
+    }
+
+    updatePlayerCardStatus(player) {
+        const playerCard = document.querySelector(`.player-card[data-player-id="${player.id}"]`);
+        if (playerCard) {
+            if (player.inPunishmentRoom) {
+                playerCard.classList.add('in-punishment');
+                playerCard.style.opacity = '0.6';
+                playerCard.style.border = '3px solid #f97316';
+            } else {
+                playerCard.classList.remove('in-punishment');
+                playerCard.style.opacity = '1';
+                playerCard.style.border = '';
+            }
+        }
     }
 
     resetGame() {
