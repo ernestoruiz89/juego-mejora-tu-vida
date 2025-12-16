@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decisión Financiera - Mejora tu Vida!</title>
+    <meta name="description" content="Juego de mesa digital multijugador basado en decisiones financieras">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <header class="game-header">
+            <h1>💰 Decisión Financiera</h1>
+            <p class="subtitle">¡Mejora tu Vida!</p>
+        </header>
+
+        <!-- Game Info Panel -->
+        <div class="game-info">
+            <div class="current-player">
+                <span class="label">Turno:</span>
+                <span id="current-player-name" class="player-name">Jugador 1</span>
+            </div>
+            <div class="player-list" id="player-list">
+                <!-- Players will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Main Game Board -->
+        <div class="board-wrapper">
+            <div class="board" id="game-board">
+                <!-- Bottom Row (Index 0-10) -->
+                <div class="space corner bottom-right" data-index="0" data-type="corner">
+                    <div class="space-content">
+                        <div class="corner-icon">🎯</div>
+                        <div class="space-name">INICIO</div>
+                    </div>
+                </div>
+                <div class="space bottom" data-index="1" data-color="blue"></div>
+                <div class="space bottom" data-index="2" data-color="red"></div>
+                <div class="space bottom" data-index="3" data-color="blue"></div>
+                <div class="space bottom" data-index="4" data-color="yellow"></div>
+                <div class="space bottom" data-index="5" data-color="red"></div>
+                <div class="space bottom" data-index="6" data-color="green"></div>
+                <div class="space bottom" data-index="7" data-color="blue"></div>
+                <div class="space bottom" data-index="8" data-color="red"></div>
+                <div class="space bottom" data-index="9" data-color="yellow"></div>
+                <div class="space corner bottom-left" data-index="10" data-type="corner">
+                    <div class="space-content">
+                        <div class="corner-icon">🎲</div>
+                        <div class="space-name">SORTEO</div>
+                    </div>
+                </div>
+
+                <!-- Left Column (Index 11-19) -->
+                <div class="space left" data-index="11" data-color="green"></div>
+                <div class="space left" data-index="12" data-color="red"></div>
+                <div class="space left" data-index="13" data-color="blue"></div>
+                <div class="space left" data-index="14" data-color="green"></div>
+                <div class="space left" data-index="15" data-color="red"></div>
+                <div class="space left" data-index="16" data-color="blue"></div>
+                <div class="space left" data-index="17" data-color="green"></div>
+                <div class="space left" data-index="18" data-color="red"></div>
+                <div class="space left" data-index="19" data-color="yellow"></div>
+
+                <!-- Top Row (Index 20-30) -->
+                <div class="space corner top-left" data-index="20" data-type="corner">
+                    <div class="space-content">
+                        <div class="corner-icon">📊</div>
+                        <div class="space-name">INVERSIONES</div>
+                    </div>
+                </div>
+                <div class="space top" data-index="21" data-color="blue"></div>
+                <div class="space top" data-index="22" data-color="green"></div>
+                <div class="space top" data-index="23" data-color="yellow"></div>
+                <div class="space top" data-index="24" data-color="red"></div>
+                <div class="space top" data-index="25" data-color="blue"></div>
+                <div class="space top" data-index="26" data-color="green"></div>
+                <div class="space top" data-index="27" data-color="red"></div>
+                <div class="space top" data-index="28" data-color="yellow"></div>
+                <div class="space top" data-index="29" data-color="blue"></div>
+                <div class="space corner top-right" data-index="30" data-type="corner">
+                    <div class="space-content">
+                        <div class="corner-icon">💵</div>
+                        <div class="space-name">MONEY</div>
+                    </div>
+                </div>
+
+                <!-- Right Column (Index 31-39) -->
+                <div class="space right" data-index="31" data-color="green"></div>
+                <div class="space right" data-index="32" data-color="blue"></div>
+                <div class="space right" data-index="33" data-color="red"></div>
+                <div class="space right" data-index="34" data-color="yellow"></div>
+                <div class="space right" data-index="35" data-color="green"></div>
+                <div class="space right" data-index="36" data-color="blue"></div>
+                <div class="space right" data-index="37" data-color="red"></div>
+                <div class="space right" data-index="38" data-color="green"></div>
+                <div class="space right" data-index="39" data-color="yellow"></div>
+
+                <!-- Center Board Area -->
+                <div class="center-board">
+                    <div class="center-content">
+                        <h2>Decisión Financiera</h2>
+                        <p class="tagline">¡Mejora tu Vida!</p>
+                        <div class="dice-container" id="dice-container">
+                            <button class="dice-button" id="roll-dice-btn">
+                                <span class="dice-icon">🎲</span>
+                                Lanzar Dados
+                            </button>
+                            <div class="dice-result" id="dice-result"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button class="btn btn-primary" id="start-game-btn">Iniciar Juego</button>
+            <button class="btn btn-secondary" id="add-player-btn">Agregar Jugador</button>
+            <button class="btn btn-secondary" id="reset-game-btn">Reiniciar</button>
+        </div>
+
+        <!-- Player Setup Modal -->
+        <div class="modal" id="player-setup-modal">
+            <div class="modal-content">
+                <h2>Configuración de Jugadores</h2>
+                <div class="player-setup-form">
+                    <label for="player-count">Número de Jugadores:</label>
+                    <input type="number" id="player-count" min="2" max="6" value="2">
+                    <div id="player-names-container"></div>
+                    <div class="modal-buttons">
+                        <button class="btn btn-primary" id="confirm-players-btn">Confirmar</button>
+                        <button class="btn btn-secondary" id="cancel-setup-btn">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
